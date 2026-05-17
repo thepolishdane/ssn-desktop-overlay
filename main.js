@@ -1,4 +1,4 @@
-const { app, BrowserWindow, globalShortcut, session } = require('electron');
+const { app, BrowserWindow, globalShortcut, session, Tray, Menu, nativeImage } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
@@ -10,12 +10,14 @@ const USER_DATA_DIR = app.isPackaged
   : __dirname;
 const CONFIG_PATH = path.join(USER_DATA_DIR, 'config.json');
 const BOUNDS_PATH = path.join(USER_DATA_DIR, 'bounds.json');
+const ICON_PATH = path.join(__dirname, 'build', 'icon.png');
 
 const THEME_BASE = 'https://thepolishdane.github.io/stream-overlays';
 
 const WINDOWS = [
   {
     id: 'chat',
+    label: 'Chat',
     bounds: { x: 50, y: 50, width: 380, height: 600 },
     buildUrl: (cfg) => {
       const params = new URLSearchParams({
@@ -35,6 +37,7 @@ const WINDOWS = [
   },
   {
     id: 'activity',
+    label: 'Activity Feed',
     bounds: { x: 50, y: 680, width: 380, height: 320 },
     buildUrl: (cfg) => {
       const params = new URLSearchParams({
@@ -44,6 +47,7 @@ const WINDOWS = [
         scroll: 'true'
       });
       if (cfg.streamElementsJwt) params.set('se_jwt', cfg.streamElementsJwt);
+      if (cfg.streamlabsSocketToken) params.set('streamlabs_token', cfg.streamlabsSocketToken);
       return `${THEME_BASE}/activity.html?${params.toString()}`;
     }
   }
@@ -58,6 +62,7 @@ function saveJson(p, data) {
 
 const config = loadJson(CONFIG_PATH, null);
 const savedBounds = loadJson(BOUNDS_PATH, {});
+if (!savedBounds._enabled) savedBounds._enabled = {};
 
 if (!config || !config.session) {
   console.error('config.json missing or has no `session` field. Copy config.example.json to config.json and edit.');
@@ -65,8 +70,35 @@ if (!config || !config.session) {
 }
 
 const windows = [];
+let tray = null;
 let editMode = false;
 let visible = true;
+
+function isEnabled(id) {
+  return savedBounds._enabled[id] !== false;
+}
+
+function setEnabled(id, enabled) {
+  savedBounds._enabled[id] = enabled;
+  saveJson(BOUNDS_PATH, savedBounds);
+}
+
+function updateWindowVisibility() {
+  for (const w of windows) {
+    const shouldShow = visible && isEnabled(w.__spec.id);
+    if (shouldShow) {
+      w.showInactive();
+    } else {
+      w.hide();
+    }
+  }
+}
+
+function toggleWindow(id) {
+  setEnabled(id, !isEnabled(id));
+  updateWindowVisibility();
+  if (tray) tray.setContextMenu(buildTrayMenu());
+}
 
 function createOverlay(spec) {
   const b = savedBounds[spec.id] || spec.bounds;
@@ -83,6 +115,7 @@ function createOverlay(spec) {
     backgroundColor: '#00000000',
     fullscreenable: false,
     minimizable: false,
+    show: false,
     title: `SSN Overlay - ${spec.id}`,
     webPreferences: {
       contextIsolation: true,
@@ -123,7 +156,8 @@ function createOverlay(spec) {
   });
 
   const persist = () => {
-    savedBounds[spec.id] = win.getBounds();
+    const cur = win.getBounds();
+    savedBounds[spec.id] = { x: cur.x, y: cur.y, width: cur.width, height: cur.height };
     saveJson(BOUNDS_PATH, savedBounds);
   };
   win.on('moved', persist);
@@ -137,6 +171,7 @@ async function enterEditMode() {
   if (editMode) return;
   editMode = true;
   for (const win of windows) {
+    if (!isEnabled(win.__spec.id)) continue;
     win.setIgnoreMouseEvents(false);
     const css = `
       html, body {
@@ -161,6 +196,7 @@ async function enterEditMode() {
     `;
     win.__editCssKey = await win.webContents.insertCSS(css);
   }
+  if (tray) tray.setContextMenu(buildTrayMenu());
 }
 
 async function exitEditMode() {
@@ -173,11 +209,57 @@ async function exitEditMode() {
       win.__editCssKey = null;
     }
   }
+  if (tray) tray.setContextMenu(buildTrayMenu());
 }
 
 function toggleVisibility() {
   visible = !visible;
-  for (const w of windows) visible ? w.showInactive() : w.hide();
+  updateWindowVisibility();
+  if (tray) tray.setContextMenu(buildTrayMenu());
+}
+
+function buildTrayMenu() {
+  const template = [];
+  for (const spec of WINDOWS) {
+    template.push({
+      label: `Show ${spec.label}`,
+      type: 'checkbox',
+      checked: isEnabled(spec.id),
+      click: () => toggleWindow(spec.id)
+    });
+  }
+  template.push({ type: 'separator' });
+  template.push({
+    label: editMode ? 'Lock layout (exit edit mode)' : 'Edit layout (drag / resize)',
+    click: () => editMode ? exitEditMode() : enterEditMode()
+  });
+  template.push({
+    label: visible ? 'Hide overlay (Ctrl+Shift+H)' : 'Show overlay (Ctrl+Shift+H)',
+    click: toggleVisibility
+  });
+  template.push({ type: 'separator' });
+  template.push({
+    label: 'Quit (Ctrl+Shift+Q)',
+    click: () => app.quit()
+  });
+  return Menu.buildFromTemplate(template);
+}
+
+function createTray() {
+  let icon;
+  try {
+    icon = nativeImage.createFromPath(ICON_PATH);
+    if (!icon.isEmpty()) {
+      icon = icon.resize({ width: 16, height: 16 });
+    }
+  } catch (e) {
+    console.warn('Tray icon load failed, using fallback:', e.message);
+    icon = nativeImage.createEmpty();
+  }
+  tray = new Tray(icon);
+  tray.setToolTip('SSN Overlay');
+  tray.setContextMenu(buildTrayMenu());
+  tray.on('double-click', toggleVisibility);
 }
 
 app.whenReady().then(() => {
@@ -194,6 +276,8 @@ app.whenReady().then(() => {
   });
 
   for (const spec of WINDOWS) windows.push(createOverlay(spec));
+  updateWindowVisibility();
+  createTray();
 
   globalShortcut.register('CommandOrControl+Shift+O', () => {
     editMode ? exitEditMode() : enterEditMode();
@@ -202,8 +286,9 @@ app.whenReady().then(() => {
   globalShortcut.register('CommandOrControl+Shift+Q', () => app.quit());
 
   console.log(`SSN Desktop Overlay running for session "${config.session}".`);
+  console.log('  Tray icon (system tray): right-click for per-window toggles + actions');
   console.log('  Ctrl+Shift+O = toggle edit mode');
-  console.log('  Ctrl+Shift+H = hide/show');
+  console.log('  Ctrl+Shift+H = hide/show all');
   console.log('  Ctrl+Shift+Q = quit');
 });
 

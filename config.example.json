@@ -1,6 +1,7 @@
 {
-  "_README": "Copy this file to config.json and fill in your values. The app needs `session` and `twitchChannel` at minimum. `streamElementsJwt` is optional and only needed if you want StreamElements donations in the activity feed (find it at: StreamElements dashboard -> profile name -> Channels tab -> Show secrets -> JWT Token). Hotkeys after launch: Ctrl+Shift+O = edit mode (drag/resize), Ctrl+Shift+H = hide/show, Ctrl+Shift+Q = quit. The game you're playing must run in BORDERLESS WINDOWED mode (exclusive fullscreen blocks the overlay).",
+  "_README": "Edit the four fields below, then save and run SSN Overlay.exe. The app needs `session` and `twitchChannel` at minimum. `streamElementsJwt` and `streamlabsSocketToken` are both OPTIONAL — fill in whichever donation service you use (or neither if you don't). Find each: SE JWT at StreamElements dashboard -> profile -> Channels -> Show secrets -> JWT Token. SL token at streamlabs.com/dashboard#/apisettings -> API Tokens -> 'Your Socket API Token'. Right-click the tray icon (bottom-right, near the clock) for per-window toggles and other actions. Hotkeys: Ctrl+Shift+O = edit mode, Ctrl+Shift+H = hide/show all, Ctrl+Shift+Q = quit. The game you're playing must run in BORDERLESS WINDOWED mode (exclusive fullscreen blocks the overlay).",
   "session": "PASTE_YOUR_SSN_SESSION_ID_HERE",
   "twitchChannel": "your_twitch_username_lowercase",
-  "streamElementsJwt": ""
+  "streamElementsJwt": "",
+  "streamlabsSocketToken": ""
 }

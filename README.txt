@@ -24,10 +24,19 @@ FIRST-TIME SETUP
        Shared Chat. Harmless to leave blank if you don't collab.
 
    "streamElementsJwt": "..."
-       OPTIONAL. Only fill this in if you use StreamElements for donations
+       OPTIONAL. Fill in only if you use StreamElements for donations
        and want them to appear in the activity feed. Find at:
        StreamElements dashboard -> profile name -> Channels tab ->
        Show secrets -> JWT Token. Leave as "" if you don't use SE.
+
+   "streamlabsSocketToken": "..."
+       OPTIONAL. Fill in only if you use Streamlabs for donations
+       and want them to appear in the activity feed. Find at:
+       streamlabs.com/dashboard#/apisettings -> API Tokens ->
+       "Your Socket API Token". Leave as "" if you don't use Streamlabs.
+
+   You can fill in ONE of the two donation services, BOTH (if you've
+   migrated between them and want overlap during transition), or NEITHER.
 
 3. Save the file.
 
@@ -45,13 +54,32 @@ RUNNING THE OVERLAY
    don't block your game.
 
 
+TRAY ICON (bottom-right of taskbar, near the clock)
+---------------------------------------------------
+
+Right-click the tray icon for a menu:
+
+   [x] Show Chat              Toggle the chat window on/off
+   [x] Show Activity Feed     Toggle the activity feed window on/off
+   ----
+   Edit layout                Enter edit mode (drag/resize)
+   Hide overlay               Hide both windows (or show)
+   ----
+   Quit                       Close the app
+
+Double-click the tray icon to quickly hide/show everything.
+
+Window states persist across launches, so if you turn off one window it
+stays off until you turn it back on.
+
+
 HOTKEYS (global - work even when the game has focus)
 -----------------------------------------------------
 
    Ctrl+Shift+O    Toggle EDIT MODE - drag to move, edges to resize the
                    overlay windows. Press again to lock them.
 
-   Ctrl+Shift+H    Hide / show the overlay.
+   Ctrl+Shift+H    Hide / show the overlay (everything).
 
    Ctrl+Shift+Q    Quit the app.
 
@@ -91,17 +119,26 @@ TROUBLESHOOTING
 Overlay appears but no chat messages show up:
   - Confirm SSN is running and has at least one platform connected
   - Confirm your session ID in config.json matches SSN's current session
-  - Press Ctrl+Shift+Q, edit config.json, relaunch
+  - Right-click tray icon -> Quit, edit config.json, relaunch
 
 Overlay doesn't appear on top of game:
   - Switch the game to borderless windowed mode
 
 Want to reposition or resize:
-  - Press Ctrl+Shift+O to enter edit mode, drag the windows, press
-    Ctrl+Shift+O again to lock
+  - Right-click tray -> "Edit layout" (or press Ctrl+Shift+O)
+  - Drag the windows, then right-click tray -> "Lock layout"
+
+Donations not showing up in activity feed:
+  - For StreamElements: double-check streamElementsJwt is current
+    (JWTs can expire or be regenerated; if you regenerated it, paste
+    the new one into config.json and relaunch)
+  - For Streamlabs: double-check streamlabsSocketToken is current
+  - Use the "test" buttons in SE or SL dashboards to fire a fake
+    donation and confirm it reaches the overlay
 
 Want to start fresh:
-  - Delete bounds.json (regenerates on next launch with default positions)
+  - Delete bounds.json (regenerates on next launch with default
+    positions and both windows enabled)
 
 
 Made by thepolishdane.
