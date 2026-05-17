@@ -5,8 +5,11 @@ const path = require('path');
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
 
-const CONFIG_PATH = path.join(__dirname, 'config.json');
-const BOUNDS_PATH = path.join(__dirname, 'bounds.json');
+const USER_DATA_DIR = app.isPackaged
+  ? path.dirname(process.execPath)
+  : __dirname;
+const CONFIG_PATH = path.join(USER_DATA_DIR, 'config.json');
+const BOUNDS_PATH = path.join(USER_DATA_DIR, 'bounds.json');
 
 const THEME_BASE = 'https://thepolishdane.github.io/stream-overlays';
 
