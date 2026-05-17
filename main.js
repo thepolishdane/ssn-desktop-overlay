@@ -23,7 +23,8 @@ const WINDOWS = [
         isdock: 'true',
         fadezone: '0',
         viewonly: 'true',
-        scroll: 'true'
+        scroll: 'true',
+        capture: 'true'
       });
       if (cfg.twitchChannel) params.set('twitchchannel', cfg.twitchChannel);
       return `${THEME_BASE}/chat.html?${params.toString()}`;
