@@ -1,0 +1,6 @@
+{
+  "_README": "Copy this file to config.json and fill in your values. The app needs `session` and `twitchChannel` at minimum. `streamElementsJwt` is optional and only needed if you want StreamElements donations in the activity feed (find it at: StreamElements dashboard -> profile name -> Channels tab -> Show secrets -> JWT Token). Hotkeys after launch: Ctrl+Shift+O = edit mode (drag/resize), Ctrl+Shift+H = hide/show, Ctrl+Shift+Q = quit. The game you're playing must run in BORDERLESS WINDOWED mode (exclusive fullscreen blocks the overlay).",
+  "session": "PASTE_YOUR_SSN_SESSION_ID_HERE",
+  "twitchChannel": "your_twitch_username_lowercase",
+  "streamElementsJwt": ""
+}

@@ -1,0 +1,12 @@
+{
+  "name": "ssn-desktop-overlay",
+  "version": "0.1.0",
+  "description": "Transparent always-on-top desktop overlay for Social Stream Ninja chat + activity feed",
+  "main": "main.js",
+  "scripts": {
+    "start": "node launch.js"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0"
+  }
+}
