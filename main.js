@@ -10,7 +10,7 @@ const USER_DATA_DIR = app.isPackaged
   : __dirname;
 const CONFIG_PATH = path.join(USER_DATA_DIR, 'config.json');
 const BOUNDS_PATH = path.join(USER_DATA_DIR, 'bounds.json');
-const ICON_PATH = path.join(__dirname, 'build', 'icon.png');
+const ICON_PATH = path.join(__dirname, 'build', 'icon-16.png');
 
 const THEME_BASE = 'https://thepolishdane.github.io/stream-overlays';
 
@@ -249,9 +249,6 @@ function createTray() {
   let icon;
   try {
     icon = nativeImage.createFromPath(ICON_PATH);
-    if (!icon.isEmpty()) {
-      icon = icon.resize({ width: 16, height: 16 });
-    }
   } catch (e) {
     console.warn('Tray icon load failed, using fallback:', e.message);
     icon = nativeImage.createEmpty();

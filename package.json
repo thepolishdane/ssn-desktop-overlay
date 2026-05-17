@@ -1,6 +1,6 @@
 {
   "name": "ssn-desktop-overlay",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Transparent always-on-top desktop overlay for Social Stream Ninja chat + activity feed",
   "main": "main.js",
   "author": "Michal Galewski (thepolishdane)",
@@ -11,7 +11,8 @@
   },
   "devDependencies": {
     "electron": "^32.0.0",
-    "electron-builder": "^25.1.8"
+    "electron-builder": "^25.1.8",
+    "png-to-ico": "^3.0.1"
   },
   "build": {
     "appId": "com.thepolishdane.ssn-overlay",
@@ -24,7 +25,7 @@
       "main.js",
       "launch.js",
       "package.json",
-      "build/icon.png"
+      "build/icon-16.png"
     ],
     "extraFiles": [
       {
@@ -38,7 +39,7 @@
     ],
     "win": {
       "target": "dir",
-      "icon": "build/icon.png"
+      "icon": "build/icon.ico"
     }
   }
 }
